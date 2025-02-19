@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id         String           @id @default(uuid())
+  name       String
+  email      String           @unique
+  subjects   TeacherSubject[]
+  students   Student[]        @relation("TeacherStudent")
+  attendance Attendance[]
+  createdAt  DateTime         @default(now())
+}
+
+model Student {
+  id            String           @id @default(uuid())
+  name          String
+  scholarnumber String           @unique
+  email         String           @unique
+  teachers      Teacher[]        @relation("TeacherStudent")
+  subjects      StudentSubject[]
+  attendance    Attendance[]
+  createdAt     DateTime         @default(now())
+}
+
+model Subject {
+  id         String           @id @default(uuid())
+  name       String
+  teachers   TeacherSubject[]
+  students   StudentSubject[]
+  attendance Attendance[]
+}
+
+model TeacherSubject {
+  id        String  @id @default(uuid())
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  teacherId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String
+}
+
+model StudentSubject {
+  id        String  @id @default(uuid())
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  student   Student          @relation(fields: [studentId], references: [id])
+  studentId String
+  subject   Subject          @relation(fields: [subjectId], references: [id])
+  subjectId String
+  teacher   Teacher          @relation(fields: [teacherId], references: [id])
+  teacherId String
+  date      DateTime
+  status    AttendanceStatus
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
