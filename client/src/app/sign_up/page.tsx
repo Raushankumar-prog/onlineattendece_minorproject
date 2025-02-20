@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import { useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";
-import { FcGoogle } from "react-icons/fc";
 import { CREATE_STUDENT, CREATE_TEACHER } from "@/graphql/queries/create_student";
-import { useGoogleAuth } from "@/lib/googleAuth";
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -16,8 +14,8 @@ export default function SignUpPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [scholarNumber, setScholarNumber] = useState(""); // Only for students
-  const [branch, setBranch] = useState(""); // New field
-  const [semester, setSemester] = useState(""); // New field
+  const [branch, setBranch] = useState("");
+  const [semester, setSemester] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChecked, setIsChecked] = useState(false);
@@ -25,13 +23,6 @@ export default function SignUpPage() {
 
   const [createStudent, { loading: studentLoading }] = useMutation(CREATE_STUDENT);
   const [createTeacher, { loading: teacherLoading }] = useMutation(CREATE_TEACHER);
-  const { user, signInWithGoogle, logout } = useGoogleAuth();
-
-  useEffect(() => {
-    if (user) {
-      handleGoogleSignUp();
-    }
-  }, [user]);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -52,10 +43,10 @@ export default function SignUpPage() {
       let data;
       if (role === "student") {
         data = await createStudent({
-          variables: { name, email, scholarnumber: scholarNumber, branch, semester },
+          variables: { name, email, scholarnumber: scholarNumber, branch, semester, password },
         });
       } else {
-        data = await createTeacher({ variables: { name, email } });
+        data = await createTeacher({ variables: { name, email, password } });
       }
 
       toast.success("Sign-up successful!");
@@ -63,28 +54,6 @@ export default function SignUpPage() {
       router.push("/");
     } catch (err) {
       toast.error(`Sign-up failed: ${err.message}`);
-    }
-  };
-
-  const handleGoogleSignUp = async () => {
-    if (!user) return;
-
-    try {
-      let data;
-      if (role === "student") {
-        data = await createStudent({
-          variables: { name: user.displayName, email: user.email, scholarnumber: "", branch: "", semester: "" },
-        });
-      } else {
-        data = await createTeacher({ variables: { name: user.displayName, email: user.email } });
-      }
-
-      toast.success("Google Sign-up successful!");
-      Cookies.set("token", data?.createStudent?.id || data?.createTeacher?.id, { expires: 7 });
-      router.push("/");
-    } catch (err) {
-      logout();
-      toast.error(`Google Sign-up failed: ${err.message}`);
     }
   };
 
@@ -197,28 +166,6 @@ export default function SignUpPage() {
             Log in
           </Link>
         </div>
-
-        <div className="flex items-center my-4">
-          <div className="flex-1 border-t border-gray-600"></div>
-          <p className="px-3 text-gray-400">OR</p>
-          <div className="flex-1 border-t border-gray-600"></div>
-        </div>
-
-        {user ? (
-          <button
-            onClick={logout}
-            className="w-full flex items-center justify-center p-3 bg-red-500 rounded hover:bg-red-600"
-          >
-            Logout
-          </button>
-        ) : (
-          <button
-            onClick={signInWithGoogle}
-            className="w-full flex items-center justify-center p-3 bg-gray-700 rounded hover:bg-gray-600"
-          >
-            <FcGoogle className="text-xl mr-2" /> Signup with Google
-          </button>
-        )}
       </div>
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

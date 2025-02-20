@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
-import { RESET_PASSWORD } from "@/graphql/queries/resetPassword";
+import { RESET_STUDENT_PASSWORD, RESET_TEACHER_PASSWORD } from "@/graphql/queries/resetPassword";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify"; // Import for toast notifications
 import "react-toastify/dist/ReactToastify.css"; // Import CSS for Toast notifications
@@ -10,14 +10,14 @@ import "react-toastify/dist/ReactToastify.css"; // Import CSS for Toast notifica
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [role, setRole] = useState("student"); // Default to student
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
-  const [resetPassword, { loading }] = useMutation(RESET_PASSWORD);
+  const resetPasswordMutation = role === "student" ? RESET_STUDENT_PASSWORD : RESET_TEACHER_PASSWORD;
+  const [resetPassword, { loading }] = useMutation(resetPasswordMutation);
 
   const handleResetPassword = async () => {
     if (!password || password.length < 6) {
@@ -47,12 +47,21 @@ export default function ResetPasswordPage() {
       <p className="mt-2 text-center text-gray-400">Enter a new password for your account.</p>
 
       <div className="mt-6">
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          className="w-full rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-white outline-none focus:border-blue-500"
+        >
+          <option value="student">Reset Password as Student</option>
+          <option value="teacher">Reset Password as Teacher</option>
+        </select>
+
         <input
           type="password"
           placeholder="New Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 mt-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <input
