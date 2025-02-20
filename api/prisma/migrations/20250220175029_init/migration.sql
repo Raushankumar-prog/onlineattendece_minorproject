@@ -6,6 +6,8 @@ CREATE TABLE "Teacher" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "password" TEXT,
+    "googleId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Teacher_pkey" PRIMARY KEY ("id")
@@ -15,6 +17,10 @@ CREATE TABLE "Teacher" (
 CREATE TABLE "Student" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "semester" TEXT,
+    "password" TEXT,
+    "googleId" TEXT,
+    "branch" TEXT,
     "scholarnumber" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -76,6 +82,9 @@ CREATE UNIQUE INDEX "Student_scholarnumber_key" ON "Student"("scholarnumber");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Student_email_key" ON "Student"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Subject_name_key" ON "Subject"("name");
 
 -- CreateIndex
 CREATE INDEX "_TeacherStudent_B_index" ON "_TeacherStudent"("B");

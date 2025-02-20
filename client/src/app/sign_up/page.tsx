@@ -14,8 +14,8 @@ export default function SignUpPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [scholarNumber, setScholarNumber] = useState(""); // Only for students
-  const [branch, setBranch] = useState("");
-  const [semester, setSemester] = useState("");
+  const [branch, setBranch] = useState("ECE");
+  const [semester, setSemester] = useState("1st");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChecked, setIsChecked] = useState(false);
@@ -23,6 +23,9 @@ export default function SignUpPage() {
 
   const [createStudent, { loading: studentLoading }] = useMutation(CREATE_STUDENT);
   const [createTeacher, { loading: teacherLoading }] = useMutation(CREATE_TEACHER);
+
+  const semesters = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
+  const branches = ["ECE", "CSE", "IT"];
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -102,23 +105,25 @@ export default function SignUpPage() {
                 required
               />
 
-              <input
-                type="text"
-                placeholder="Branch"
+              <select
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
                 className="w-full rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-white outline-none focus:border-blue-500"
-                required
-              />
+              >
+                {branches.map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
 
-              <input
-                type="text"
-                placeholder="Semester"
+              <select
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
                 className="w-full rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-white outline-none focus:border-blue-500"
-                required
-              />
+              >
+                {semesters.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </>
           )}
 

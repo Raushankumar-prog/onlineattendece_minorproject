@@ -9,6 +9,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Link href="/" className="text-gray-300 hover:text-white transition">
             Home
           </Link>
+           <Link href="/subject" className="text-gray-300 hover:text-white transition">
+            Subject
+          </Link>
           <Link href="/attendance" className="text-gray-300 hover:text-white transition">
             Take Attendance
           </Link>

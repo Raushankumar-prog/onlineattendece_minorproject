@@ -24,7 +24,7 @@ async function main() {
           name: faker.person.fullName(),
           email: faker.internet.email().toLowerCase(),
           googleId: faker.string.uuid(),
-          password:faker.string.uuid(),
+          password: password, // Using the hashed password
         },
       });
     })
@@ -38,7 +38,7 @@ async function main() {
 
   // Assign Subjects to Teachers (each subject is taught by 1-2 teachers)
   for (const subject of subjects) {
-    const assignedTeachers = faker.helpers.arrayElements(teachers, { min: 1, max: 2 });
+    const assignedTeachers = faker.helpers.arrayElements(teachers, faker.number.int({ min: 1, max: 2 }));
     for (const teacher of assignedTeachers) {
       await prisma.teacherSubject.create({
         data: {
@@ -60,12 +60,11 @@ async function main() {
         data: {
           name: faker.person.fullName(),
           email: faker.internet.email().toLowerCase(),
-          scholarnumber: `SCHL${1000 + i}`,
-
-          semester: faker.helpers.rangeToNumber({ min: 1, max: 8 }).toString(), // Random semester 1-8
+          scholarnumber: `SCHL${1000 + i}`, // Corrected template literal
+          semester: faker.number.int({ min: 1, max: 8 }).toString(), // Random semester 1-8
           branch: faker.helpers.arrayElement(branches), // Random branch
           googleId: faker.string.uuid(),
-          password:faker.string.uuid(),
+          password: password, // Using hashed password
         },
       });
     })
@@ -73,7 +72,7 @@ async function main() {
 
   // Assign Students to Subjects (each student takes 3-5 subjects)
   for (const student of students) {
-    const enrolledSubjects = faker.helpers.arrayElements(subjects, { min: 3, max: 5 });
+    const enrolledSubjects = faker.helpers.arrayElements(subjects, faker.number.int({ min: 3, max: 5 }));
     for (const subject of enrolledSubjects) {
       await prisma.studentSubject.create({
         data: {
@@ -106,7 +105,7 @@ async function main() {
               studentId: student.id,
               subjectId: subjectRelation.subjectId,
               teacherId: randomTeacher.id,
-              date: faker.date.recent({ days: 10 }),
+              date: faker.date.recent(10), // Fixed incorrect syntax
               status: faker.helpers.arrayElement(['PRESENT', 'ABSENT', 'LATE']),
             },
           });

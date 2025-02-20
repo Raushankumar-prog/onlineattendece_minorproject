@@ -18,7 +18,7 @@ export const typeDefs = gql`
     name: String
     scholarnumber: String!
     semester: String!
-    branch:String!
+    branch: String!
     password: String
     googleId: String
     email: String!
@@ -31,6 +31,7 @@ export const typeDefs = gql`
   type Subject {
     id: ID!
     name: String!
+    subjectcode:String!
     teachers: [TeacherSubject!]
     students: [StudentSubject!]
     attendance: [Attendance!]
@@ -77,18 +78,19 @@ export const typeDefs = gql`
   }
 
   type AuthPayloadStudent {
-  token: String!
-  student: Student!
-} 
+    token: String!
+    student: Student!
+  } 
 
- type AuthPayloadTeacher {
-  token: String!
-  student: Student!
-} 
+  type AuthPayloadTeacher {
+    token: String!
+    teacher: Teacher!
+  } 
 
   type Mutation {
     createTeacher(name: String!, email: String!, password: String, googleId: String): Teacher!
-    createStudent(name: String!, scholarnumber: String!, email: String!, password: String, googleId: String,semester:String!,branch:String!): Student!
+    createStudent(name: String!, scholarnumber: String!, email: String!, password: String, googleId: String, semester: String!, branch: String!): Student!
+    createSubject(name: String!, subjectcode:  String!): Subject!
     createAttendance(studentId: ID!, subjectId: ID!, teacherId: ID!, date: String!, status: AttendanceStatus!): Attendance!
     loginTeacher(email: String!, password: String, googleId: String): AuthPayloadTeacher!
     loginStudent(email: String!, password: String, googleId: String): AuthPayloadStudent!
