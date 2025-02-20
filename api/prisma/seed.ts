@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -16,11 +17,14 @@ async function main() {
 
   // Create 4 Teachers
   const teachers = await Promise.all(
-    Array.from({ length: 4 }).map(async (_, i) => {
+    Array.from({ length: 4 }).map(async () => {
+      const password = await bcrypt.hash("password123", 10);
       return prisma.teacher.create({
         data: {
           name: faker.person.fullName(),
-          email: faker.internet.email().toLowerCase(), // Ensure unique random emails
+          email: faker.internet.email().toLowerCase(),
+          googleId: faker.string.uuid(),
+          password:faker.string.uuid(),
         },
       });
     })
@@ -29,9 +33,7 @@ async function main() {
   // Create 6 Subjects
   const subjectNames = ['Mathematics', 'Science', 'English', 'History', 'Physics', 'Computer Science'];
   const subjects = await Promise.all(
-    subjectNames.map(async (name) => {
-      return prisma.subject.create({ data: { name } });
-    })
+    subjectNames.map(async (name) => prisma.subject.create({ data: { name } }))
   );
 
   // Assign Subjects to Teachers (each subject is taught by 1-2 teachers)
@@ -47,14 +49,23 @@ async function main() {
     }
   }
 
-  // Create 30 Students
+  // List of branches
+  const branches = ['Computer Science', 'Mechanical', 'Electrical', 'Civil', 'Electronics'];
+
+  // Create 30 Students with semester and branch
   const students = await Promise.all(
     Array.from({ length: 10 }).map(async (_, i) => {
+      const password = await bcrypt.hash("password123", 10);
       return prisma.student.create({
         data: {
           name: faker.person.fullName(),
-          email: faker.internet.email().toLowerCase(), // Ensure unique emails
+          email: faker.internet.email().toLowerCase(),
           scholarnumber: `SCHL${1000 + i}`,
+
+          semester: faker.helpers.rangeToNumber({ min: 1, max: 8 }).toString(), // Random semester 1-8
+          branch: faker.helpers.arrayElement(branches), // Random branch
+          googleId: faker.string.uuid(),
+          password:faker.string.uuid(),
         },
       });
     })

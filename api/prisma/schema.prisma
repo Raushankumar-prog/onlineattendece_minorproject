@@ -11,6 +11,8 @@ model Teacher {
   id         String           @id @default(uuid())
   name       String
   email      String           @unique
+  password   String?
+  googleId   String?
   subjects   TeacherSubject[]
   students   Student[]        @relation("TeacherStudent")
   attendance Attendance[]
@@ -20,6 +22,10 @@ model Teacher {
 model Student {
   id            String           @id @default(uuid())
   name          String
+  semester      String?
+  password      String?
+  googleId      String?
+  branch        String?
   scholarnumber String           @unique
   email         String           @unique
   teachers      Teacher[]        @relation("TeacherStudent")

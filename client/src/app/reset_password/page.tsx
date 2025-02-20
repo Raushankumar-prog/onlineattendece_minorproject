@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
-import { RESET_PASSWORD } from "../../graphql/queries/resetPassword";
+import { RESET_PASSWORD } from "@/graphql/queries/resetPassword";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify"; // Import for toast notifications
 import "react-toastify/dist/ReactToastify.css"; // Import CSS for Toast notifications

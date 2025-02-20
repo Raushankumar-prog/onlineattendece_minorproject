@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { useGoogleAuth } from "@lib/googleAuth";
+import { useGoogleAuth } from "@/lib/googleAuth";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client";
-import { login } from "../../graphql/queries/login";
+import { login } from "@/graphql/queries/login";
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify"; // Correct import for ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import CSS for Toast notifications

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation } from "@apollo/client";
-import { SEND_RESET_CODE } from "../../graphql/queries/sendResetcode";
-import { VERIFY_RESET_CODE } from "../../graphql/queries/verifyResetcode";
+import { SEND_RESET_CODE } from "@/graphql/queries/sendresetcode";
+import { VERIFY_RESET_CODE } from "@/graphql/queries/verifyResetcode";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; 
