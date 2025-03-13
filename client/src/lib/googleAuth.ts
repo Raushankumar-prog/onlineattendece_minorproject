@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GoogleAuthProvider, signInWithPopup, getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { initializeApp } from "firebase/app";
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  getAuth, 
+  onAuthStateChanged, 
+  signOut, 
+  User 
+} from "firebase/auth";
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,22 +21,19 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-let app; // Declare app outside the function
- console.log(firebaseConfig);
-try {
- 
- app = initializeApp(firebaseConfig);
-} catch (e) {
- console.error("Firebase initialization error:", e);
- // Handle the error gracefully (e.g., display an error message to the user)
+// Ensure Firebase initializes only once
+let app: FirebaseApp;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps()[0]; // Use existing instance
 }
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 export function useGoogleAuth() {
-  const [user, setUser] = useState(null);
-
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -37,9 +41,6 @@ export function useGoogleAuth() {
     });
     return () => unsubscribe();
   }, []);
-
-
-
 
   const signInWithGoogle = async () => {
     try {
@@ -50,9 +51,6 @@ export function useGoogleAuth() {
     }
   };
 
-  
-
-
   const logout = async () => {
     try {
       await signOut(auth);
@@ -62,6 +60,5 @@ export function useGoogleAuth() {
     }
   };
 
-  
   return { user, signInWithGoogle, logout };
 }

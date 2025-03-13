@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export function ScrollArea({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <ScrollAreaPrimitive.Root className={cn("overflow-hidden", className)}>
+    <ScrollAreaPrimitive.Root className={cn("overflow-hidden", className ?? " ")}>
       <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-md">
         {children}
       </ScrollAreaPrimitive.Viewport>

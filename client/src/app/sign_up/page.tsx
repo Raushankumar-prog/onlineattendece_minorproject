@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import { CREATE_STUDENT, CREATE_TEACHER } from "@/graphql/queries/create_student";
@@ -9,23 +9,32 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 
+// Define TypeScript interfaces for mutation responses
+interface CreateStudentResponse {
+  createStudent: { id: string };
+}
+
+interface CreateTeacherResponse {
+  createTeacher: { id: string };
+}
+
 export default function SignUpPage() {
-  const [role, setRole] = useState("student"); // Default role
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [scholarNumber, setScholarNumber] = useState(""); // Only for students
-  const [branch, setBranch] = useState("ECE");
-  const [semester, setSemester] = useState("1st");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isChecked, setIsChecked] = useState(false);
+  const [role, setRole] = useState<"student" | "teacher">("student");
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [scholarNumber, setScholarNumber] = useState<string>("");
+  const [branch, setBranch] = useState<string>("ECE");
+  const [semester, setSemester] = useState<string>("1st");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [isChecked, setIsChecked] = useState<boolean>(false);
   const router = useRouter();
 
-  const [createStudent, { loading: studentLoading }] = useMutation(CREATE_STUDENT);
-  const [createTeacher, { loading: teacherLoading }] = useMutation(CREATE_TEACHER);
+  const [createStudent, { loading: studentLoading }] = useMutation<CreateStudentResponse>(CREATE_STUDENT);
+  const [createTeacher, { loading: teacherLoading }] = useMutation<CreateTeacherResponse>(CREATE_TEACHER);
 
-  const semesters = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
-  const branches = ["ECE", "CSE", "IT"];
+  const semesters: string[] = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
+  const branches: string[] = ["ECE", "CSE", "IT"];
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -34,7 +43,7 @@ export default function SignUpPage() {
     }
   }, [router]);
 
-  const handleSignUp = async (e) => {
+  const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -43,21 +52,32 @@ export default function SignUpPage() {
     }
 
     try {
-      let data;
+      let userId: string | null = null;
+
       if (role === "student") {
-        data = await createStudent({
+        const { data } = await createStudent({
           variables: { name, email, scholarnumber: scholarNumber, branch, semester, password },
         });
+        userId = data?.createStudent?.id || null;
       } else {
-        data = await createTeacher({ variables: { name, email, password } });
+        const { data } = await createTeacher({ variables: { name, email, password } });
+        userId = data?.createTeacher?.id || null;
       }
 
-      toast.success("Sign-up successful!");
-      Cookies.set("token", data?.createStudent?.id || data?.createTeacher?.id, { expires: 7 });
-      router.push("/");
+      if (userId) {
+        Cookies.set("token", userId, { expires: 7 }); // Explicitly storing as a string
+        toast.success("Sign-up successful!");
+        router.push("/");
+      } else {
+        throw new Error("Invalid response from server.");
+      }
     } catch (err) {
-      toast.error(`Sign-up failed: ${err.message}`);
-    }
+  if (err instanceof Error) {
+    toast.error(`Sign-up failed: ${err.message}`);
+  } else {
+    toast.error("Sign-up failed due to an unknown error.");
+  }
+}
   };
 
   return (
@@ -69,7 +89,7 @@ export default function SignUpPage() {
         <form onSubmit={handleSignUp} className="space-y-4">
           <select
             value={role}
-            onChange={(e) => setRole(e.target.value)}
+            onChange={(e) => setRole(e.target.value as "student" | "teacher")}
             className="w-full rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-white outline-none focus:border-blue-500"
           >
             <option value="student">Sign up as Student</option>
