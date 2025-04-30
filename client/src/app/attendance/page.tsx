@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { DatePicker } from "@/components/ui/date-picker";
-import * as Select from "@radix-ui/react-select";
 import { GET_SUBJECT } from "@/graphql/queries/getsubject";
+import { DatePicker } from "@/components/ui/date-picker";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import * as Select from "@radix-ui/react-select";
+import * as Dialog from "@radix-ui/react-dialog";
+import { CheckCircle2, X } from "lucide-react";
 
 // TypeScript Interfaces
 interface Student {
@@ -20,9 +22,8 @@ interface Subject {
   name: string;
 }
 
-// Temporary teacher details (Replace with actual backend/cookie values later)
-const teacherId = "T12345"; // Replace this with actual backend/cookie data
-const teacherName = "John Doe"; // Replace with actual teacher's name
+const teacherId = "T12345";
+const teacherName = "Dr. Neha singh";
 
 const semesters = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
 const branches = ["ECE", "CSE", "IT"];
@@ -32,23 +33,22 @@ export default function Attendance() {
   const [subject, setSubject] = useState<string>("");
   const [semester, setSemester] = useState<string>(semesters[0]);
   const [branch, setBranch] = useState<string>(branches[0]);
+  const [openModal, setOpenModal] = useState<boolean>(false);
 
   const { data, loading, error } = useQuery<{ subjects: Subject[] }>(GET_SUBJECT);
 
-  // Set default subject when data is available
   useEffect(() => {
     if (data?.subjects?.length) {
       setSubject(data.subjects[0].name);
     }
   }, [data]);
 
-  // Sample 72 Students with Scholar Number
   const [students, setStudents] = useState<Student[]>(
     Array.from({ length: 72 }, (_, i) => ({
       id: i + 1,
       name: `Student ${i + 1}`,
       scholarNumber: `SCH${1000 + i}`,
-      present: false,
+      present: true, // ✅ Everyone present by default
     }))
   );
 
@@ -63,20 +63,20 @@ export default function Attendance() {
   const saveAttendance = () => {
     console.log("Attendance saved:", {
       date: date.toISOString().split("T")[0],
-      teacherId, // Will be fetched dynamically later
-      teacherName, // Displayed on UI
+      teacherId,
+      teacherName,
       subject,
       semester,
       branch,
       students,
     });
 
-    alert("Attendance saved successfully!");
+    setOpenModal(true);
 
-    // Reset fields
+    // Reset selections except date and subject
     setSemester(semesters[0]);
     setBranch(branches[0]);
-    setStudents((prev) => prev.map((student) => ({ ...student, present: false })));
+    setStudents((prev) => prev.map((s) => ({ ...s, present: true })));
   };
 
   return (
@@ -89,66 +89,60 @@ export default function Attendance() {
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         {/* Subject Dropdown */}
-        <div className="relative">
-          <Select.Root value={subject} onValueChange={setSubject} disabled={loading || !! error}>
-            <Select.Trigger className="bg-gray-700 text-white p-2 rounded-md w-full cursor-pointer">
-              {loading ? "Loading..." : error ? "Error loading subjects" : subject}
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content className="bg-gray-900 border border-gray-700 rounded-md shadow-lg">
-                <Select.Viewport className="p-2">
-                  {data?.subjects?.map((sub) => (
-                    <Select.Item key={sub.id} value={sub.name} className="p-2 bg-black hover:bg-gray-900 cursor-pointer">
-                      {sub.name}
-                    </Select.Item>
-                  ))}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
-        </div>
+        <Select.Root value={subject} onValueChange={setSubject} disabled={loading || !!error}>
+          <Select.Trigger className="bg-gray-700 text-white p-2 rounded-md w-full cursor-pointer">
+            <Select.Value placeholder={loading ? "Loading..." : error ? "Error loading" : "Select Subject"} />
+          </Select.Trigger>
+          <Select.Portal>
+            <Select.Content className="bg-gray-900 border border-gray-700 rounded-md shadow-lg">
+              <Select.Viewport className="p-2">
+                {data?.subjects?.map((sub) => (
+                  <Select.Item key={sub.id} value={sub.name} className="p-2 bg-black hover:bg-gray-900 cursor-pointer">
+                    <Select.ItemText>{sub.name}</Select.ItemText>
+                  </Select.Item>
+                ))}
+              </Select.Viewport>
+            </Select.Content>
+          </Select.Portal>
+        </Select.Root>
 
         {/* Semester Dropdown */}
-        <div className="relative">
-          <Select.Root value={semester} onValueChange={setSemester}>
-            <Select.Trigger className="bg-gray-700 text-white p-2 rounded-md w-full cursor-pointer">
-              {semester}
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content className="bg-gray-900 border border-gray-700 rounded-md shadow-lg">
-                <Select.Viewport className="p-2">
-                  {semesters.map((sem) => (
-                    <Select.Item key={sem} value={sem} className="p-2 bg-black hover:bg-gray-900 cursor-pointer">
-                      {sem}
-                    </Select.Item>
-                  ))}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
-        </div>
+        <Select.Root value={semester} onValueChange={setSemester}>
+          <Select.Trigger className="bg-gray-700 text-white p-2 rounded-md w-full cursor-pointer">
+            <Select.Value />
+          </Select.Trigger>
+          <Select.Portal>
+            <Select.Content className="bg-gray-900 border border-gray-700 rounded-md shadow-lg">
+              <Select.Viewport className="p-2">
+                {semesters.map((sem) => (
+                  <Select.Item key={sem} value={sem} className="p-2 bg-black hover:bg-gray-900 cursor-pointer">
+                    <Select.ItemText>{sem}</Select.ItemText>
+                  </Select.Item>
+                ))}
+              </Select.Viewport>
+            </Select.Content>
+          </Select.Portal>
+        </Select.Root>
       </div>
 
       {/* Branch Dropdown */}
       <div className="mb-4">
-        <div className="relative">
-          <Select.Root value={branch} onValueChange={setBranch}>
-            <Select.Trigger className="bg-gray-700 text-white p-2 rounded-md w-full cursor-pointer">
-              {branch}
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content className="bg-gray-900 border border-gray-700 rounded-md shadow-lg">
-                <Select.Viewport className="p-2">
-                  {branches.map((br) => (
-                    <Select.Item key={br} value={br} className="p-2 bg-black hover:bg-gray-600 cursor-pointer">
-                      {br}
-                    </Select.Item>
-                  ))}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
-        </div>
+        <Select.Root value={branch} onValueChange={setBranch}>
+          <Select.Trigger className="bg-gray-700 text-white p-2 rounded-md w-full cursor-pointer">
+            <Select.Value />
+          </Select.Trigger>
+          <Select.Portal>
+            <Select.Content className="bg-gray-900 border border-gray-700 rounded-md shadow-lg">
+              <Select.Viewport className="p-2">
+                {branches.map((br) => (
+                  <Select.Item key={br} value={br} className="p-2 bg-black hover:bg-gray-600 cursor-pointer">
+                    <Select.ItemText>{br}</Select.ItemText>
+                  </Select.Item>
+                ))}
+              </Select.Viewport>
+            </Select.Content>
+          </Select.Portal>
+        </Select.Root>
       </div>
 
       {/* Date Picker */}
@@ -181,6 +175,27 @@ export default function Attendance() {
       >
         Save Attendance
       </button>
+
+      {/* Success Modal */}
+      <Dialog.Root open={openModal} onOpenChange={setOpenModal}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
+          <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-[90%] max-w-sm -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <Dialog.Title asChild>
+                <h2 className="text-xl font-bold text-green-600 flex items-center gap-2">
+                  <CheckCircle2 className="text-green-500" />
+                  Success
+                </h2>
+              </Dialog.Title>
+              <button onClick={() => setOpenModal(false)}>
+                <X className="w-5 h-5 text-gray-400 hover:text-red-500" />
+              </button>
+            </div>
+            <p className="text-white">Attendance saved successfully!</p>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
